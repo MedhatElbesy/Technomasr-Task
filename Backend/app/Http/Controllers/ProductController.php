@@ -18,14 +18,30 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $products = Product::with(['attributes', 'categories:id'])->get();
-        if ($products) {
-            return ApiResponse::sendResponse(200, 'All Products',  ProductResource::collection($products));
-        }
-        return ApiResponse::sendResponse(404, 'Can`t find Products');
+    public function index(Request $request)
+{
+    $products = Product::with(['attributes', 'categories:id'])
+        ->when($request->search, function($query) use($request) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        })
+        ->when($request->sort_by, function($query) use($request) {
+            if ($request->sort_by == 'newest') {
+                $query->orderBy('created_at', 'desc');
+            } elseif ($request->sort_by == 'highest_price') {
+                $query->orderBy('price', 'desc');
+            } elseif ($request->sort_by == 'lowest_price') {
+                $query->orderBy('price', 'asc');
+            }
+        })
+        ->get();
+
+    if ($products->isNotEmpty()) {
+        return ApiResponse::sendResponse(200, 'All Products', ProductResource::collection($products));
     }
+
+    return ApiResponse::sendResponse(404, 'Can`t find Products');
+}
+
 
     /**
      * Store a newly created resource in storage.

@@ -20,7 +20,6 @@ class CategoryController extends Controller
             return ApiResponse::sendResponse(200, 'All Categories', CategoryResource::collection($categories));
         }
         return ApiResponse::sendResponse(404, 'There are no  Categories');
-
     }
 
     /**

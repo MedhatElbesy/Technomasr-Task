@@ -43,16 +43,13 @@ class AdminController extends Controller
 
     public function logout(Request $request)
     {
-        $token = $request -> header('auth-token');
-        if($token){
-            try {
-                JWTAuth::setToken($token)->invalidate();
-            }catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e){
-                return ApiResponse::sendResponse(500, 'some thing went wrongs');
-            }
-            return ApiResponse::sendResponse(200, 'Loged out Success For Admin');
-        }else{
-            return ApiResponse::sendResponse(500, 'some thing went wrongs');
+        try {
+            Auth::guard('admin-api')->logout();
+
+            return ApiResponse::sendResponse(200, "Logout Success");
+
+        } catch (\Exception $ex) {
+            return ApiResponse::sendResponse(500, 'Logout Failed', $ex->getMessage());
         }
     }
 }

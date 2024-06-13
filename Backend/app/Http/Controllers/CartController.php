@@ -35,12 +35,23 @@ class CartController extends Controller
         return ApiResponse::sendResponse(201,"Created Successfully", new CartResource($cart));
     }
 
-    public function update(UpdateCartRequest $request, Cart $cart)
-
+    public function update(CartRequest $request, $id)
     {
-        $this->authorize('update',$cart);
-        $stockValidation= $this->checkStock($request,$cart->product_id);
-        $cart->update($request->validated());
-        return ApiResponse::sendResponse(200,"Updated Successfully", new CartResource($cart));
+        $currntUser = auth()->user();
+        $validatedData = $request->validated();
+
+        $cartItem = Cart::where([
+            'id' => $id,
+            'user_id' => $currntUser->id,
+        ])->first();
+
+        if (!$cartItem) {
+            return ApiResponse::sendResponse(404, 'Cart item not found');
+        }
+
+        $cartItem->update($validatedData);
+
+        return ApiResponse::sendResponse(200, 'Updated Successfully', new CartResource($cartItem));
     }
+
 }

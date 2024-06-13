@@ -22,6 +22,7 @@ class UpdateCartRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'product_id' => 'sometimes|integer|exists:products,id',
             'quantity' => 'sometimes|integer|min:1',
         ];
     }
